@@ -17,12 +17,20 @@ public class App {
 
     public LinkedList<Player> players = new LinkedList<Player>();
     private boolean gameOver = false;
+
+    private boolean gameStarted = false;
     private Player nextPlayer = null;
 
     public String createPlayer(Request req, Response res) {
         JSONObject json = new Utils().fromJson(req.body());
         Player wannabePlayer = new Player(json);
-        if (exist(wannabePlayer) || moreThanFourPlayer()) {
+        if (exist(wannabePlayer) || moreThanFourPlayer() || gameStarted) {
+            if(gameStarted){
+                // ...no! Game has already started without you.
+                res.status(400);
+                res.type("application/json");
+                return "{\"error\": \"game has started already with: " + printNames(players) + "\"}";
+            }
             if(moreThanFourPlayer()){
                 // ...no! Too much players already in the game.
                 res.status(400);
@@ -35,8 +43,9 @@ public class App {
             return "{\"error\": \"nickname already taken: " + wannabePlayer.getNickname() + "\"}";
         } else {
             players.add(wannabePlayer);
-            if (players.size() == 4)
+            if (players.size() == 2){
                 nextPlayer = players.getFirst();
+            }
 
             logger.info("{} joined the game!", wannabePlayer);
             res.status(201);
@@ -58,7 +67,7 @@ public class App {
 
     public String roll(Request req, Response res) {
         res.type("application/json");
-        if (!moreThanFourPlayer()) {
+        if (!moreThanTwoPlayer()) {
             res.status(400);
             return "{\"error\": \"Game not started, waiting for more players\"}";
         }
@@ -75,6 +84,7 @@ public class App {
                     return "{\"error\": \"Is not your turn " + player.getName() + "!\"}";
                 }
                 String movePlayer = movePlayer(player);
+                gameStarted = true;
                 nextPlayer = players.get((players.indexOf(player) + 1 ) % players.size());
                 logger.info("next player is {}", nextPlayer);
 
@@ -93,6 +103,10 @@ public class App {
 
     private boolean moreThanFourPlayer() {
         return players.size() >= 4;
+    }
+
+    private boolean moreThanTwoPlayer() {
+        return players.size() >= 2;
     }
 
     private String printNames(LinkedList<Player> players) {
