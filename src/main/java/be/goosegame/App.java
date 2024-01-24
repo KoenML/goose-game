@@ -22,36 +22,34 @@ public class App {
     public String createPlayer(Request req, Response res) {
         JSONObject json = new Utils().fromJson(req.body());
         Player wannabePlayer = new Player(json);
-        if (exist(wannabePlayer)) {
-            // player name already taken
-            res.status(400);
-            res.type("application/json");
-            return "{\"error\": \"nickname already taken: " + wannabePlayer.getNickname() + "\"}";
-        } else {
-            // check to see if we can add one more player...
-            if (!moreThanFourPlayer()) {
-                players.add(wannabePlayer);
-                if (players.size() == 4)
-                    nextPlayer = players.getFirst();
-
-                logger.info("{} joined the game!", wannabePlayer);
-                res.status(201);
-                res.type("application/json");
-                return "{\"id\": \"" + wannabePlayer.getUuid()
-                        + "\", \"name\": \"" + wannabePlayer.getName()
-                        + "\", \"nickname\": \"" + wannabePlayer.getNickname() + "\"}";
-            } else {
+        if (exist(wannabePlayer) || moreThanFourPlayer()) {
+            if(moreThanFourPlayer()){
                 // ...no! Too much players already in the game.
                 res.status(400);
                 res.type("application/json");
                 return "{\"error\": \"too many players already: " + printNames(players) + "\"}";
             }
+            // player name already taken
+            res.status(400);
+            res.type("application/json");
+            return "{\"error\": \"nickname already taken: " + wannabePlayer.getNickname() + "\"}";
+        } else {
+            players.add(wannabePlayer);
+            if (players.size() == 4)
+                nextPlayer = players.getFirst();
+
+            logger.info("{} joined the game!", wannabePlayer);
+            res.status(201);
+            res.type("application/json");
+            return "{\"id\": \"" + wannabePlayer.getUuid()
+                    + "\", \"name\": \"" + wannabePlayer.getName()
+                    + "\", \"nickname\": \"" + wannabePlayer.getNickname() + "\"}";
         }
     }
 
     private boolean exist(Player nickname) {
         for (Player p : players) {
-            if (p.getNickname().equals(nickname)) {
+            if (p.getNickname().equals(nickname.getNickname())) {
                 return true;
             }
         }
