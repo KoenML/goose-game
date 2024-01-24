@@ -3,6 +3,7 @@ package be.goosegame;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -19,13 +20,13 @@ public class DiceRollerService {
         // {"success":true,"dice":[{"value":5,"type":"d6"},{"value":1,"type":"d6"}]}
     }
 
-    public JSONObject roll() {
+    public JSONObject roll() throws RuntimeException {
         Request request = new Request.Builder().url(DICE_SERVICE_URL).build();
 
         try (Response response = httpClient.newCall(request).execute()) {
             String rollResult = response.body().string();
             return new JSONObject(rollResult);
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             throw new RuntimeException("cannot roll dice!", e);
         }
     }

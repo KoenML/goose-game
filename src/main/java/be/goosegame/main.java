@@ -8,7 +8,7 @@ import static spark.Spark.*;
 public class main {
     private static Logger logger = LoggerFactory.getLogger(main.class);
 
-    private static App app = new App();
+    private static App app = new App(new DiceRollerService());
 
     public static void main(String[] args) {
         port(8080);

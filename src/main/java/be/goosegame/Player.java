@@ -21,6 +21,13 @@ public class Player {
         this.uuid = UUID.randomUUID();
     }
 
+    public Player(String name, String nickname, int position) {
+        this.name = name;
+        this.nickname = nickname;
+        this.uuid = UUID.randomUUID();
+        this.position = position;
+    }
+
     public int getPosition() {
         return position;
     }
